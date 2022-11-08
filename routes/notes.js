@@ -6,6 +6,9 @@ const Newsec=require("../model/Section")
 const AllNotes=require("../model/AllNotes")
 const { body } = require("express-validator");
 
+router.get("/",(req,res)=>{
+    res.send("i am in notes")
+})
 
 router.post("/newsec", async (req,res)=>{
     try{
