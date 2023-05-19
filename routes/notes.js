@@ -6,9 +6,47 @@ const Newsec=require("../model/Section")
 const AllNotes=require("../model/AllNotes")
 const { body } = require("express-validator");
 
-router.get("/",(req,res)=>{
-    res.send("i am in notes")
+router.post("/search",async(req,res)=>{
+ 
+  
+    try{
+    let words=req.body.words;
+    const data=await AllNotes.find();
+    
+    function checkWords(sentence, words) {
+        const pattern = new RegExp(words.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
+        
+        const isMatch = pattern.test(sentence);
+        
+        return isMatch;
+      }
+      
+      // Example usage
+      
+      function helperBeforeCheck(sentence,words){
+        for(let word of words.split(" ")){
+        const containsWords = checkWords(sentence, word);
+        if (containsWords==true){
+            return true;
+        }
+    }
+        return false;
+      }
+      
+    let finalData=[];
+    for(let sentence of data){
+      if (helperBeforeCheck(sentence.title,words) || helperBeforeCheck(sentence.description,words) || helperBeforeCheck(sentence.hlo,words)){
+        finalData.push(sentence);
+      }
+    }
+    res.json(finalData)
+    
+
+}catch(e){
+    res.json(e)
+}
 })
+
 
 router.post("/newsec", async (req,res)=>{
     try{
@@ -95,6 +133,16 @@ router.delete("/allnotes",async(req,res)=>{
     try{
     let code = await AllNotes.findById(req.body._id);
     code =await AllNotes.findByIdAndDelete(req.body._id);
+    res.json({"Success":"Succesucfully deleted"});
+    }catch(e){
+        res.json({e})
+    }
+})
+
+router.delete("/sec",async(req,res)=>{
+    try{
+    let sec = await Newsec.findById(req.body._id);
+    sec =await Newsec.findByIdAndDelete(req.body._id);
     res.json({"Success":"Succesucfully deleted"});
     }catch(e){
         res.json({e})
